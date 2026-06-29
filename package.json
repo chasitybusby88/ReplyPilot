@@ -1,0 +1,15 @@
+{
+  "name": "replypilot",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev -w frontend",
+    "dev:backend": "npm run dev -w backend",
+    "build": "npm run build --workspaces",
+    "install:all": "npm install --workspaces"
+  }
+}

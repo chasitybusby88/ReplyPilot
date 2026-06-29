@@ -89,7 +89,10 @@ export async function extractQualificationData(serviceType: string, text: string
  * Updates a lead's qualification data and status.
  */
 export async function processLeadReply(leadId: string, replyText: string) {
-  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+  const lead = await prisma.lead.findUnique({ 
+      where: { id: leadId },
+      include: { qualification: true }
+  });
   if (!lead) return;
 
   // 1. Log the reply
@@ -105,49 +108,50 @@ export async function processLeadReply(leadId: string, replyText: string) {
   const extracted = await extractQualificationData(lead.serviceType, replyText);
   
   if (extracted) {
-    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
-    if (!lead) return;
-
     // Merge property details
-    const currentDetails = (lead.propertyDetails as Record<string, any>) || {};
+    const currentDetails = (lead.qualification?.propertyDetails as Record<string, any>) || {};
     const newDetails = { ...currentDetails, ...(extracted.propertyDetails || {}) };
 
-    // Update lead
-    const updatedLead = await prisma.lead.update({
-      where: { id: leadId },
+    // Update qualification record
+    const updatedQual = await prisma.leadQualification.update({
+      where: { leadId },
       data: {
         propertyDetails: newDetails,
-        urgency: extracted.urgency || lead.urgency,
-        budgetRange: extracted.budgetRange || lead.budgetRange,
+        urgency: extracted.urgency || lead.qualification?.urgency,
+        budgetRange: extracted.budgetRange || lead.qualification?.budgetRange,
+        serviceNeeded: extracted.serviceNeeded || lead.qualification?.serviceNeeded,
       },
     });
 
     // 3. Check if qualified
-    const isQualified = checkQualification(updatedLead);
+    const isQualified = checkQualification(updatedQual);
     
-    if (isQualified && updatedLead.qualificationStatus !== 'QUALIFIED') {
+    if (isQualified && updatedQual.status !== 'QUALIFIED') {
+      await prisma.leadQualification.update({
+        where: { leadId },
+        data: { status: 'QUALIFIED' },
+      });
+      
       await prisma.lead.update({
         where: { id: leadId },
-        data: { 
-          qualificationStatus: 'QUALIFIED',
-          status: 'QUALIFIED' 
-        },
+        data: { status: 'QUALIFIED' },
       });
-      console.log(`[NOTIFICATION] Business owner notified: Lead ${updatedLead.name} (${updatedLead.id}) is now QUALIFIED and ready for an estimate.`);
+
+      console.log(`[NOTIFICATION] Business owner notified: Lead ${lead.name} (${leadId}) is now QUALIFIED.`);
     } else if (!isQualified) {
-        await prisma.lead.update({
-            where: { id: leadId },
-            data: { qualificationStatus: 'PARTIAL' },
+        await prisma.leadQualification.update({
+            where: { leadId },
+            data: { status: 'PARTIAL' },
         });
     }
   }
 }
 
-function checkQualification(lead: any): boolean {
+function checkQualification(qual: any): boolean {
   // Logic to determine if a lead is "ready for estimate"
   // For now, let's say they need at least propertyDetails and urgency
-  const hasPropertyDetails = lead.propertyDetails && Object.keys(lead.propertyDetails as object).length > 0;
-  const hasUrgency = !!lead.urgency;
+  const hasPropertyDetails = qual.propertyDetails && Object.keys(qual.propertyDetails as object).length > 0;
+  const hasUrgency = !!qual.urgency;
   
   return !!(hasPropertyDetails && hasUrgency);
 }

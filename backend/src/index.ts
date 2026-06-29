@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import leadRoutes from './routes/leads';
+import sequenceRoutes from './routes/sequences';
+import { processPendingFollowUps } from './services/followUp';
 
 dotenv.config();
 
@@ -13,11 +15,29 @@ app.use(express.json());
 
 // Routes
 app.use('/api/leads', leadRoutes);
+app.use('/api/sequences', sequenceRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Follow-up Engine Worker (Run every 1 minute for demo/dev purposes)
+setInterval(async () => {
+    try {
+        await processPendingFollowUps();
+    } catch (error) {
+        console.error('Follow-up engine worker error:', error);
+    }
+}, 60000); // 60 seconds
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Global error handlers to prevent crashes
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
 });

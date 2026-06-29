@@ -8,32 +8,87 @@ datasource db {
 }
 
 model Lead {
-  id                  String     @id @default(uuid())
+  id                  String             @id @default(uuid())
   name                String
   email               String
   phone               String
   serviceType         String
   message             String?
-  status              String     @default("NEW")
-  qualificationStatus String     @default("UNQUALIFIED")
-  propertyDetails     Json?
-  urgency             String?
-  budgetRange         String?
+  status              String             @default("NEW")
   clientId            String?
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
-  client              Client?    @relation("ClientLeads", fields: [clientId], references: [id])
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  client              Client?            @relation("ClientLeads", fields: [clientId], references: [id])
   responses           Response[]
+  qualification       LeadQualification?
+  sequenceAssignments LeadSequence[]
+}
+
+model LeadQualification {
+  id              String   @id @default(uuid())
+  leadId          String   @unique
+  status          String   @default("UNQUALIFIED")
+  propertyDetails Json?
+  urgency         String?
+  budgetRange     String?
+  serviceNeeded   String?
+  updatedAt       DateTime @updatedAt
+  lead            Lead     @relation(fields: [leadId], references: [id])
+}
+
+model FollowUpSequence {
+  id          String         @id @default(uuid())
+  name        String
+  description String?
+  steps       FollowUpStep[]
+  assignments LeadSequence[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model FollowUpStep {
+  id         String           @id @default(uuid())
+  sequenceId String
+  day        Int // 1-14
+  type       String // EMAIL or SMS
+  template   String // Handlebars-style template
+  subject    String? // For email
+  sequence   FollowUpSequence @relation(fields: [sequenceId], references: [id])
+  responses  Response[]
+
+  @@unique([sequenceId, day, type])
+}
+
+model LeadSequence {
+  id         String           @id @default(uuid())
+  leadId     String
+  sequenceId String
+  status     String           @default("ACTIVE") // ACTIVE, PAUSED, COMPLETED, STOPPED
+  currentDay Int              @default(0)
+  nextSendAt DateTime
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  lead       Lead             @relation(fields: [leadId], references: [id])
+  sequence   FollowUpSequence @relation(fields: [sequenceId], references: [id])
+  responses  Response[]
+
+  @@unique([leadId, sequenceId])
 }
 
 model Response {
-  id        String   @id @default(uuid())
-  leadId    String
-  type      String
-  content   String
-  sentAt    DateTime @default(now())
-  createdAt DateTime @default(now())
-  lead      Lead     @relation(fields: [leadId], references: [id])
+  id             String        @id @default(uuid())
+  leadId         String
+  leadSequenceId String?
+  stepId         String?
+  type           String
+  content        String
+  openedAt       DateTime?
+  clickedAt      DateTime?
+  sentAt         DateTime      @default(now())
+  createdAt      DateTime      @default(now())
+  lead           Lead          @relation(fields: [leadId], references: [id])
+  leadSequence   LeadSequence? @relation(fields: [leadSequenceId], references: [id])
+  step           FollowUpStep? @relation(fields: [stepId], references: [id])
 }
 
 model Client {

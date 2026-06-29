@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Lead {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  phone       String
+  serviceType String
+  message     String?
+  status      String   @default("NEW")
+  clientId    String?
+  client      Client?  @relation("ClientLeads", fields: [clientId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  leads     Lead[]   @relation("ClientLeads")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Adding client relation to lead
+// This might need adjustment based on how clients are handled, but for now let's keep it simple.
+// For the capture API, we might not know the client yet if it's a general landing page, 
+// or we might pass a clientId.

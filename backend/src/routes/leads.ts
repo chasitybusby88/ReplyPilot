@@ -267,7 +267,12 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const leads = await prisma.lead.findMany({
       include: {
-          qualification: true
+          qualification: true,
+          sequenceAssignments: {
+              include: {
+                  sequence: true
+              }
+          }
       },
       orderBy: { createdAt: 'desc' },
     });

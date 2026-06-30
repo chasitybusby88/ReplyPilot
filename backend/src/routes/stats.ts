@@ -43,9 +43,13 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     const qualificationRate = totalLeads > 0 ? (qualifiedLeads / totalLeads) * 100 : 0;
     const bookingRate = totalLeads > 0 ? (bookedLeads / totalLeads) * 100 : 0;
     
-    // MRR mock: $500 setup + $300/mo base
-    const activeClients = await prisma.client.count();
-    const mrr = activeClients * 300;
+    // MRR logic: BASE=$300, PRO=$700, ENTERPRISE=$1500
+    const clients = await prisma.client.findMany();
+    const mrr = clients.reduce((acc, client) => {
+      if (client.tier === 'PRO') return acc + 700;
+      if (client.tier === 'ENTERPRISE') return acc + 1500;
+      return acc + 300;
+    }, 0);
 
     res.json({
       metrics: {

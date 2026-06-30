@@ -12,6 +12,7 @@ async function main() {
         data: {
             name: 'Pro Roofing LLC',
             email: 'info@proroofing.com',
+            tier: 'PRO',
             leads: {
                 create: [
                     {

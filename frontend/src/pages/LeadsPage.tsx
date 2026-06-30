@@ -25,6 +25,13 @@ interface Lead {
     urgency: string;
     budgetRange: string;
   };
+  sequenceAssignments?: Array<{
+    status: string;
+    currentDay: number;
+    sequence: {
+      name: string;
+    };
+  }>;
 }
 
 const LeadsPage: React.FC = () => {
@@ -119,6 +126,7 @@ const LeadsPage: React.FC = () => {
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Lead Info</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Service</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Sequence</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Qualification</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
@@ -139,6 +147,16 @@ const LeadsPage: React.FC = () => {
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-sm text-gray-900 font-medium">{lead.serviceType}</span>
+                </td>
+                <td className="px-6 py-4">
+                  {lead.sequenceAssignments && lead.sequenceAssignments.length > 0 ? (
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{lead.sequenceAssignments[0].sequence.name}</p>
+                      <p className="text-xs text-gray-500">Day {lead.sequenceAssignments[0].currentDay} • {lead.sequenceAssignments[0].status}</p>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-gray-400 italic">No active sequence</span>
+                  )}
                 </td>
                 <td className="px-6 py-4">
                   <div className="space-y-1">

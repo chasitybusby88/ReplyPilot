@@ -126,6 +126,7 @@ model Client {
   id        String   @id @default(uuid())
   name      String
   email     String   @unique
+  tier      String   @default("BASE") // BASE, PRO, ENTERPRISE
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   leads     Lead[]   @relation("ClientLeads")

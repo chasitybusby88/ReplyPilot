@@ -109,6 +109,19 @@ model Response {
   step           FollowUpStep? @relation(fields: [stepId], references: [id])
 }
 
+model MissedCall {
+  id              String   @id @default(uuid())
+  phone           String
+  fromCity        String?
+  fromState       String?
+  fromCountry     String?
+  callSid         String   @unique
+  respondedAt     DateTime?
+  forwardedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 model Client {
   id        String   @id @default(uuid())
   name      String

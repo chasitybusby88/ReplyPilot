@@ -22,6 +22,21 @@ model Lead {
   responses           Response[]
   qualification       LeadQualification?
   sequenceAssignments LeadSequence[]
+  appointments        Appointment[]
+}
+
+model Appointment {
+  id              String   @id @default(uuid())
+  leadId          String
+  clientId        String?
+  scheduledAt     DateTime
+  durationMinutes Int      @default(60)
+  status          String   @default("SCHEDULED") // SCHEDULED, CANCELLED, COMPLETED
+  notes           String?
+  calendarEventId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lead            Lead     @relation(fields: [leadId], references: [id])
 }
 
 model LeadQualification {

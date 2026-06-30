@@ -99,7 +99,9 @@ export async function processPendingFollowUps() {
 }
 
 async function sendFollowUpMessage(lead: any, step: any, leadSequenceId: string) {
-  const content = interpolateTemplate(step.template, lead);
+  const bookingLink = `https://replypilot.app/book/${lead.id}`;
+  const data = { ...lead, bookingLink };
+  const content = interpolateTemplate(step.template, data);
   
   // Log the response and link it to the step and sequence
   await prisma.response.create({

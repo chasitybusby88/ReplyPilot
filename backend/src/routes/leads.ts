@@ -3,6 +3,8 @@ import prisma from '../lib/prisma';
 import { processLeadResponse } from '../services/aiResponse';
 import { processLeadReply, extractQualificationData } from '../services/qualification';
 import { assignLeadToSequence, stopFollowUpSequence, processPendingFollowUps } from '../services/followUp';
+import { bookAppointment } from '../services/scheduling';
+import { parseISO } from 'date-fns';
 
 const router = Router();
 
@@ -186,6 +188,78 @@ router.get('/:id/responses', async (req: Request, res: Response): Promise<void> 
     console.error('Error fetching responses:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+// GET /api/leads/:id/appointments - Fetch upcoming appointments for a lead
+router.get('/:id/appointments', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const appointments = await prisma.appointment.findMany({
+        where: { leadId: id },
+        orderBy: { scheduledAt: 'asc' },
+      });
+  
+      res.json(appointments);
+    } catch (error) {
+      console.error('Error fetching lead appointments:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// POST /api/leads/:id/appointments - Book an appointment for a lead
+router.post('/:id/appointments', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { scheduledAt, durationMinutes } = req.body;
+  
+      if (!scheduledAt) {
+        res.status(400).json({ error: 'Missing scheduledAt field' });
+        return;
+      }
+  
+      const appointment = await bookAppointment(
+        id,
+        parseISO(scheduledAt),
+        durationMinutes || 60
+      );
+      
+      // Auto-stop follow-up sequences when an appointment is booked
+      await stopFollowUpSequence(id);
+  
+      res.status(201).json(appointment);
+    } catch (error: any) {
+      console.error('Error booking appointment for lead:', error);
+      res.status(400).json({ error: error.message || 'Failed to book appointment' });
+    }
+});
+
+// POST /api/leads/:id/send-booking-link - Send a booking link via SMS
+router.post('/:id/send-booking-link', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const lead = await prisma.lead.findUnique({ where: { id } });
+      if (!lead) {
+        res.status(404).json({ error: 'Lead not found' });
+        return;
+      }
+  
+      const bookingLink = `https://replypilot.app/book/${id}`;
+      const message = `Hi ${lead.name}! You can book your estimate appointment here: ${bookingLink}`;
+      
+      await prisma.response.create({
+          data: {
+              leadId: id,
+              type: 'SMS',
+              content: message,
+          }
+      });
+  
+      console.log(`[MOCK SEND] SMS to ${lead.phone}: ${message}`);
+      res.json({ message: 'Booking link sent successfully' });
+    } catch (error) {
+      console.error('Error sending booking link:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 // GET /api/leads - List all leads

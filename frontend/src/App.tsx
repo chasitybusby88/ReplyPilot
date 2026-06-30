@@ -3,6 +3,7 @@ import './App.css';
 import DashboardLayout from './components/DashboardLayout';
 import DashboardHome from './pages/DashboardHome';
 import LeadsPage from './pages/LeadsPage';
+import SignupPage from './pages/SignupPage';
 
 // Landing Page Placeholder (using existing App component logic)
 function LandingPage() {
@@ -14,7 +15,7 @@ function LandingPage() {
           <div className="nav-links">
             <a href="#features">Features</a>
             <a href="#pricing">Pricing</a>
-            <a href="/dashboard" className="btn btn-primary">Go to Dashboard</a>
+            <a href="/signup" className="btn btn-primary">Get Started</a>
           </div>
         </div>
       </nav>
@@ -27,7 +28,7 @@ function LandingPage() {
             Book 2-3x more estimates every month without lifting a finger.
           </p>
           <div className="hero-cta">
-            <a href="/dashboard" className="btn btn-large btn-primary">Start Your Free Trial</a>
+            <a href="/signup" className="btn btn-large btn-primary">Start Your Free Trial</a>
             <a href="#features" className="btn btn-large btn-secondary">Learn More</a>
           </div>
         </div>
@@ -86,6 +87,9 @@ function App() {
       <Routes>
         {/* Landing Page */}
         <Route path="/" element={<LandingPage />} />
+        
+        {/* Signup Page */}
+        <Route path="/signup" element={<SignupPage />} />
         
         {/* Dashboard Routes */}
         <Route path="/dashboard" element={<DashboardLayout children={<DashboardHome />} />} />

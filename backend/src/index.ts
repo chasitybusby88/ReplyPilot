@@ -5,6 +5,7 @@ import leadRoutes from './routes/leads';
 import sequenceRoutes from './routes/sequences';
 import schedulingRoutes from './routes/scheduling';
 import missedCallRoutes from './routes/missedCalls';
+import statsRoutes from './routes/stats';
 import { processPendingFollowUps } from './services/followUp';
 import { processUpcomingReminders } from './services/reminders';
 import { processPendingEscalations } from './services/missedCall';
@@ -23,6 +24,7 @@ app.use('/api/leads', leadRoutes);
 app.use('/api/sequences', sequenceRoutes);
 app.use('/api/appointments', schedulingRoutes);
 app.use('/api/missed-calls', missedCallRoutes);
+app.use('/api/stats', statsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });

@@ -1,6 +1,11 @@
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import './App.css';
+import DashboardLayout from './components/DashboardLayout';
+import DashboardHome from './pages/DashboardHome';
+import LeadsPage from './pages/LeadsPage';
 
-function App() {
+// Landing Page Placeholder (using existing App component logic)
+function LandingPage() {
   return (
     <div className="landing-page">
       <nav className="navbar">
@@ -9,7 +14,7 @@ function App() {
           <div className="nav-links">
             <a href="#features">Features</a>
             <a href="#pricing">Pricing</a>
-            <a href="#contact" className="btn btn-primary">Get Started</a>
+            <a href="/dashboard" className="btn btn-primary">Go to Dashboard</a>
           </div>
         </div>
       </nav>
@@ -22,7 +27,7 @@ function App() {
             Book 2-3x more estimates every month without lifting a finger.
           </p>
           <div className="hero-cta">
-            <a href="#contact" className="btn btn-large btn-primary">Start Your Free Trial</a>
+            <a href="/dashboard" className="btn btn-large btn-primary">Start Your Free Trial</a>
             <a href="#features" className="btn btn-large btn-secondary">Learn More</a>
           </div>
         </div>
@@ -66,54 +71,36 @@ function App() {
         </div>
       </section>
 
-      <section id="pricing" className="pricing">
-        <div className="container">
-          <h2 className="section-title">Simple, Transparent Pricing</h2>
-          <div className="pricing-grid">
-            <div className="pricing-card">
-              <h3>Setup Fee</h3>
-              <div className="price">$500 – $2,000</div>
-              <p className="price-detail">One-time investment</p>
-              <ul className="price-features">
-                <li>Custom AI Training</li>
-                <li>CRM Integration</li>
-                <li>Workflow Automation Setup</li>
-              </ul>
-            </div>
-            <div className="pricing-card featured">
-              <div className="badge">Most Popular</div>
-              <h3>Monthly Subscription</h3>
-              <div className="price">$300 – $1,500<span>/mo</span></div>
-              <p className="price-detail">Tiered by lead volume</p>
-              <ul className="price-features">
-                <li>Unlimited AI Responses</li>
-                <li>Unlimited Follow-ups</li>
-                <li>Real-time Dashboard</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="contact" className="cta-section">
-        <div className="container">
-          <h2>Ready to Supercharge Your Lead Follow-up?</h2>
-          <p>Join dozens of home service contractors who are booking more jobs with ReplyPilot.</p>
-          <form className="contact-form">
-            <input type="text" placeholder="Your Name" required />
-            <input type="email" placeholder="Business Email" required />
-            <button type="submit" className="btn btn-large btn-primary">Get a Demo</button>
-          </form>
-        </div>
-      </section>
-
       <footer className="footer">
         <div className="container">
           <p>&copy; 2024 ReplyPilot. All rights reserved.</p>
         </div>
       </footer>
     </div>
-  )
+  );
 }
 
-export default App
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+        
+        {/* Dashboard Routes */}
+        <Route path="/dashboard" element={<DashboardLayout children={<DashboardHome />} />} />
+        <Route path="/dashboard/leads" element={<DashboardLayout children={<LeadsPage />} />} />
+        
+        {/* Placeholder Routes */}
+        <Route path="/dashboard/appointments" element={<DashboardLayout children={<div className="p-8 text-center text-gray-500">Appointments view coming soon...</div>} />} />
+        <Route path="/dashboard/sequences" element={<DashboardLayout children={<div className="p-8 text-center text-gray-500">Follow-up Sequences view coming soon...</div>} />} />
+        <Route path="/dashboard/settings" element={<DashboardLayout children={<div className="p-8 text-center text-gray-500">Settings view coming soon...</div>} />} />
+        
+        {/* Catch-all Redirect */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;

@@ -18,27 +18,27 @@ model Lead {
   clientId            String?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
+  appointments        Appointment[]
   client              Client?            @relation("ClientLeads", fields: [clientId], references: [id])
-  responses           Response[]
   qualification       LeadQualification?
   sequenceAssignments LeadSequence[]
-  appointments        Appointment[]
+  responses           Response[]
 }
 
 model Appointment {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   leadId          String
   clientId        String?
   scheduledAt     DateTime
-  durationMinutes Int      @default(60)
-  status          String   @default("SCHEDULED") // SCHEDULED, CANCELLED, COMPLETED
+  durationMinutes Int       @default(60)
+  status          String    @default("SCHEDULED")
   notes           String?
-  calendarEventId String?
-  reminded24hAt   DateTime?
-  reminded1hAt    DateTime?
-  confirmedAt     DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  calendarEventId String?
+  confirmedAt     DateTime?
+  reminded1hAt    DateTime?
+  reminded24hAt   DateTime?
   lead            Lead      @relation(fields: [leadId], references: [id])
 }
 
@@ -58,19 +58,19 @@ model FollowUpSequence {
   id          String         @id @default(uuid())
   name        String
   description String?
-  steps       FollowUpStep[]
-  assignments LeadSequence[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+  steps       FollowUpStep[]
+  assignments LeadSequence[]
 }
 
 model FollowUpStep {
   id         String           @id @default(uuid())
   sequenceId String
-  day        Int // 1-14
-  type       String // EMAIL or SMS
-  template   String // Handlebars-style template
-  subject    String? // For email
+  day        Int
+  type       String
+  template   String
+  subject    String?
   sequence   FollowUpSequence @relation(fields: [sequenceId], references: [id])
   responses  Response[]
 
@@ -81,7 +81,7 @@ model LeadSequence {
   id         String           @id @default(uuid())
   leadId     String
   sequenceId String
-  status     String           @default("ACTIVE") // ACTIVE, PAUSED, COMPLETED, STOPPED
+  status     String           @default("ACTIVE")
   currentDay Int              @default(0)
   nextSendAt DateTime
   createdAt  DateTime         @default(now())
@@ -96,30 +96,30 @@ model LeadSequence {
 model Response {
   id             String        @id @default(uuid())
   leadId         String
-  leadSequenceId String?
-  stepId         String?
   type           String
   content        String
-  openedAt       DateTime?
-  clickedAt      DateTime?
   sentAt         DateTime      @default(now())
   createdAt      DateTime      @default(now())
+  clickedAt      DateTime?
+  leadSequenceId String?
+  openedAt       DateTime?
+  stepId         String?
   lead           Lead          @relation(fields: [leadId], references: [id])
   leadSequence   LeadSequence? @relation(fields: [leadSequenceId], references: [id])
   step           FollowUpStep? @relation(fields: [stepId], references: [id])
 }
 
 model MissedCall {
-  id              String   @id @default(uuid())
-  phone           String
-  fromCity        String?
-  fromState       String?
-  fromCountry     String?
-  callSid         String   @unique
-  respondedAt     DateTime?
-  forwardedAt     DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id          String    @id @default(uuid())
+  phone       String
+  fromCity    String?
+  fromState   String?
+  fromCountry String?
+  callSid     String    @unique
+  respondedAt DateTime?
+  forwardedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Client {

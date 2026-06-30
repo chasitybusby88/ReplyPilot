@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { getAvailableSlots, bookAppointment, cancelAppointment } from '../services/scheduling';
+import { confirmAppointment } from '../services/reminders';
 import { parseISO } from 'date-fns';
 
 const router = Router();
@@ -51,6 +52,18 @@ router.post('/:id/cancel', async (req: Request, res: Response): Promise<void> =>
     } catch (error: any) {
       console.error('Error cancelling appointment:', error);
       res.status(400).json({ error: error.message || 'Failed to cancel appointment' });
+    }
+});
+
+// POST /api/appointments/:id/confirm - Confirm an appointment
+router.post('/:id/confirm', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const appointment = await confirmAppointment(id);
+      res.json(appointment);
+    } catch (error: any) {
+      console.error('Error confirming appointment:', error);
+      res.status(400).json({ error: error.message || 'Failed to confirm appointment' });
     }
 });
 

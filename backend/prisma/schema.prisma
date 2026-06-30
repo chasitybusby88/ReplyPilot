@@ -34,9 +34,12 @@ model Appointment {
   status          String   @default("SCHEDULED") // SCHEDULED, CANCELLED, COMPLETED
   notes           String?
   calendarEventId String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  lead            Lead     @relation(fields: [leadId], references: [id])
+  reminded24hAt   DateTime?
+  reminded1hAt    DateTime?
+  confirmedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  lead            Lead      @relation(fields: [leadId], references: [id])
 }
 
 model LeadQualification {

@@ -5,6 +5,7 @@ import leadRoutes from './routes/leads';
 import sequenceRoutes from './routes/sequences';
 import schedulingRoutes from './routes/scheduling';
 import { processPendingFollowUps } from './services/followUp';
+import { processUpcomingReminders } from './services/reminders';
 
 dotenv.config();
 
@@ -23,12 +24,13 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Follow-up Engine Worker (Run every 1 minute for demo/dev purposes)
+// Background Worker (Run every 1 minute for demo/dev purposes)
 setInterval(async () => {
     try {
         await processPendingFollowUps();
+        await processUpcomingReminders();
     } catch (error) {
-        console.error('Follow-up engine worker error:', error);
+        console.error('Background worker error:', error);
     }
 }, 60000); // 60 seconds
 
